@@ -37,7 +37,6 @@ while read calendar_id; do
   # 今回の結果を過去データとして保存
   mkdir -p ${work_dir}/events_old
   mv $tmp-${calendar_id}_events ${work_dir}/events_old/${calendar_id}_events
-
 done
 
 # 一時ファイルの削除

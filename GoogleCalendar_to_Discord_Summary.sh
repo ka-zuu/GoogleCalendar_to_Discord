@@ -15,6 +15,7 @@ cd ${work_dir}
 source ${work_dir}/keys.sh
 
 # カレンダーイベントの取得
+cat ${work_dir}/target_calendars.txt |
 while read calendar_id; do
   python3 ${work_dir}/get_event_gcal.py ${calendar_id} > $tmp-${calendar_id}_events
 
@@ -28,7 +29,6 @@ while read calendar_id; do
   # 予定の開始時間を整形
   sed 's/^.*T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1:\2 \3/' > $tmp-${calendar_id}_events_today
 
-  cat ${work_dir}/target_events.txt |
   while read event; do
     # 通知するメッセージを作成
     message="【${calendar_id}】${event}"
