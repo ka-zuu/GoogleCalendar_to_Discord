@@ -26,12 +26,13 @@ while read calendar_id; do
 
   # 差分があればDiscordに通知
   if [ -s $tmp-${calendar_id}_diff ]; then
+    cat $tmp-${calendar_id}_diff |
     while read line; do
       if [ "${line:0:1}" = ">" ]; then
         # Discordに通知
         curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"${line:2}\"}" ${DISCORD_WEBHOOK_URL}
       fi
-    done < $tmp-${calendar_id}_diff
+    done
   fi
 
   # 今回の結果を過去データとして保存

@@ -27,14 +27,15 @@ while read calendar_id; do
   # 今日の日付を削除
   sed -e "s/^${today} //" |
   # 予定の開始時間を整形
-  sed 's/^.*T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1:\2 \3/' > $tmp-${calendar_id}_events_today
+  sed 's/^.*T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1:\2 \3/' |
 
+  # Discordにイベントを通知
   while read event; do
     # 通知するメッセージを作成
     message="【${calendar_id}】${event}"
-    # discordに通知
+    # Discordに投稿
     curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"${message}\"}" ${DISCORD_WEBHOOK_URL}
-  done < $tmp-${calendar_id}_events_today
+  done
 done
 
 # 一時ファイルの削除
