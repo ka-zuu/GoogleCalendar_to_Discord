@@ -17,7 +17,7 @@ source ${work_dir}/keys.sh
 # カレンダーイベントの取得
 cat ${work_dir}/target_calendars.txt |
 while read calendar_id; do
-  python3 ${work_dir}/get_event_gcal.py ${calendar_id} > $tmp-${calendar_id}_events
+  python3 ${work_dir}/get_event_gcal_service_account.py ${calendar_id} > $tmp-${calendar_id}_events
 
   # 過去のデータを取得して、差分を抽出
   if [ -s ${work_dir}/events_old/${calendar_id}_events ]; then
