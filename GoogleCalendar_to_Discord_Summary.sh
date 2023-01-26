@@ -27,15 +27,22 @@ while read calendar_id; do
   # 今日の日付を削除
   sed -e "s/^${today} //" |
   # 予定の開始時間を整形
-  sed 's/^.*T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1:\2 \3/' |
+  sed 's/^.*T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1:\2 \3/' > $tmp-${calendar_id}_today
 
-  # Discordにイベントを通知
-  while read event; do
-    # 通知するメッセージを作成
-    message="【${calendar_id}】${event}"
-    # Discordに投稿
-    curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"${message}\"}" ${DISCORD_WEBHOOK_URL}
-  done
+  if [ -s $tmp-${calendar_id}_today ]; then
+    # 今日の予定がある場合、各行にカレンダー名を付与して、1行にまとめる
+    cat $tmp-${calendar_id}_today |
+    awk '{print "【'${calendar_id}'",$0}' |
+    # 改行を削除して、一行にまとめる
+    sed "s/$/\\\n/" |
+    tr -d "\n" > $tmp-${calendar_id}_today_summary
+
+    # Discordに通知
+    curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$(cat $tmp-${calendar_id}_today_summary)\"}" ${DISCORD_WEBHOOK_URL}
+  else
+    # 今日の予定がない場合、Discordに通知
+    curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"【${calendar_id}】今日の予定はありません\"}" ${DISCORD_WEBHOOK_URL}
+  fi
 done
 
 # 一時ファイルの削除
