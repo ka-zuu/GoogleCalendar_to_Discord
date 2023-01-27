@@ -27,8 +27,10 @@ while read calendar_id; do
   # 差分があればDiscordに通知
   if [ -s $tmp-${calendar_id}_diff ]; then
     cat $tmp-${calendar_id}_diff |
+    # 予定の日時を整形
+    sed 's/^\(.*\)T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1 \2:\3 \4/' |
     # 差分を日本語にする
-    awk '{if($1=="<"){$1="追加"}else if($1==">"){$1="削除"}; print $0}' |
+    awk '{if($1==">"){$1="追加"}else if($1=="<"){$1="削除"}; print $0}' |
     # 改行を削除して、一行にまとめる
     sed "s/$/\\\n/" |
     tr -d "\n" > $tmp-${calendar_id}_diff_for_send
