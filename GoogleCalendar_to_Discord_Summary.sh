@@ -24,8 +24,6 @@ while read calendar_id; do
   cat $tmp-${calendar_id}_events |
   # 今日の日付で始まる行を取得
   grep -e "^${today}" |
-  # 今日の日付を削除
-  sed -e "s/^${today} //" |
   # 予定の開始時間を整形
   sed 's/^.*T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1:\2 \3/' |
   awk '{if(NF==1){print "終日",$0}else{print $0}}' > $tmp-${calendar_id}_today
