@@ -28,13 +28,13 @@ while read calendar_id; do
   if [ -s $tmp-${calendar_id}_diff ]; then
     cat $tmp-${calendar_id}_diff |
     # 差分を日本語にする
-    awk '{if($1==">"){$1="追加"}else if($1=="<"){$1="削除"}; print $0}' |
+    awk '{if($1=="<"){$1="追加"}else if($1==">"){$1="削除"}; print $0}' |
     # 改行を削除して、一行にまとめる
     sed "s/$/\\\n/" |
     tr -d "\n" > $tmp-${calendar_id}_diff_for_send
 
     # Discordに通知
-    curl -X POST -H "Content-Type: application/json" -d '{"content": '"$(cat $tmp-${calendar_id}_diff_for_send)"'}' ${DISCORD_WEBHOOK_URL}
+    curl -X POST -H "Content-Type: application/json" -d '{"content": "'"$(cat $tmp-${calendar_id}_diff_for_send)"'"}' ${DISCORD_WEBHOOK_URL}
   fi
 
   # 今回の結果を過去データとして保存
