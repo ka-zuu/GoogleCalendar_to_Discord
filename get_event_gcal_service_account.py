@@ -15,7 +15,7 @@ def main():
 
     try:
         service = build('calendar', 'v3', credentials=creds)
-        now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+        today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).isoformat() + 'Z'
         events_result = service.events().list(calendarId=calendar_id, timeMin=now, singleEvents=True, orderBy='startTime').execute()
         events = events_result.get('items', [])
 
