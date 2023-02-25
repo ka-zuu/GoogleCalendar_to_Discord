@@ -30,19 +30,21 @@ while read calendar_id; do
 
   if [ -s $tmp-${calendar_id}_today ]; then
     # 今日の予定がある場合、各行にカレンダー名を付与して、1行にまとめる
-    cat $tmp-${calendar_id}_today |
-    awk '{print "【'${calendar_id}'】\n",$0}' |
-    # 改行を削除して、一行にまとめる
-    sed "s/$/\\\n/" |
-    tr -d "\n" > $tmp-${calendar_id}_today_summary
+    cat <(echo "【${calendar_id}】" ) $tmp-${calendar_id}_today >> $tmp-today_summary
 
-    # Discordに通知
-    curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$(cat $tmp-${calendar_id}_today_summary)\"}" ${DISCORD_WEBHOOK_URL}
   else
     # 今日の予定がない場合、Discordに通知
-    curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"【${calendar_id}】\n今日の予定はありません\"}" ${DISCORD_WEBHOOK_URL}
+    echo -e "【${calendar_id}】\n今日の予定はありません" >> $tmp-today_summary
   fi
 done
+
+# Discordに通知
+cat $tmp-today_summary |
+# 改行を削除して、一行にまとめる
+sed "s/$/\\\n/" |
+tr -d "\n" > $tmp-today_summary2
+
+curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"$(cat $tmp-today_summary2)\"}" ${DISCORD_WEBHOOK_URL}
 
 # 一時ファイルの削除
 rm -f $tmp-*
