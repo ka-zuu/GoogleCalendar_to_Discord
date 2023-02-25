@@ -24,25 +24,33 @@ while read calendar_id; do
     diff ${work_dir}/events_old/${calendar_id}_events $tmp-${calendar_id}_events > $tmp-${calendar_id}_diff
   fi
 
-  # 差分があればDiscordに通知
+  # 差分があればDiscordに通知するために追記
   if [ -s $tmp-${calendar_id}_diff ]; then
     cat $tmp-${calendar_id}_diff |
     # 予定の日時を整形
     sed 's/^\(.*\)T\([0-9][0-9]\):\([0-9][0-9]\).* \(.*$\)/\1 \2:\3 \4/' |
+    # >か<で始まる行だけを取得
+    grep -e "^>" -e "^<" |
     # 差分を日本語にする
-    awk '{if($1==">"){$1="追加"}else if($1=="<"){$1="削除"}; print $0}' |
-    # 改行を削除して、一行にまとめる
-    sed "s/$/\\\n/" |
-    tr -d "\n" > $tmp-${calendar_id}_diff_for_send
-
-    # Discordに通知
-    curl -X POST -H "Content-Type: application/json" -d '{"content": "'"$(cat $tmp-${calendar_id}_diff_for_send)"'"}' ${DISCORD_WEBHOOK_URL}
+    sed -e 's/^>/追加/' -e 's/^</削除/' |
+    cat <(echo "【${calendar_id}】") - >> $tmp-diff_for_send
   fi
 
   # 今回の結果を過去データとして保存
   mkdir -p ${work_dir}/events_old
   mv $tmp-${calendar_id}_events ${work_dir}/events_old/${calendar_id}_events
 done
+
+# 送信する差分があれば、Discordに通知
+if [ -s $tmp-diff_for_send ]; then
+  cat $tmp-diff_for_send |
+  # 改行を削除して、一行にまとめる
+  sed "s/$/\\\n/" |
+  tr -d "\n" > $tmp-diff_for_send2
+
+  # Discordに通知
+  curl -X POST -H "Content-Type: application/json" -d '{"content": "'"$(cat $tmp-diff_for_send2)"'"}' ${DISCORD_WEBHOOK_URL}
+fi
 
 # 一時ファイルの削除
 rm -f $tmp-*
