@@ -21,7 +21,11 @@ while read calendar_id; do
 
   # 過去のデータを取得して、差分を抽出
   if [ -s ${work_dir}/events_old/${calendar_id}_events ]; then
-    diff ${work_dir}/events_old/${calendar_id}_events $tmp-${calendar_id}_events > $tmp-${calendar_id}_diff
+    # 過去のデータから昨日の日付を含む行は除く
+    cat ${work_dir}/events_old/${calendar_id}_events |
+    grep -v "$(date -d "1 day ago" +%Y-%m-%d)" |
+    # 差分を取る
+    diff - $tmp-${calendar_id}_events > $tmp-${calendar_id}_diff
   fi
 
   # 差分があればDiscordに通知するために追記
