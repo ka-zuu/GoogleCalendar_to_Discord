@@ -21,9 +21,11 @@ while read -r calendar_id; do
 
   # 過去のデータを取得して、差分を抽出
   if [ -s "${work_dir}/events_old/${calendar_id}_events" ]; then
-    # 過去のデータから昨日の日付を含む行は除く
+    # 過去のデータから終了日が昨日の日付を含む行は除く
+    yday="$(date -d "1 day ago" +%Y-%m-%d)"
     cat "${work_dir}/events_old/${calendar_id}_events" |
-    grep -v "$(date -d "1 day ago" +%Y-%m-%d)" |
+    # 2フィールド目(終了日)が昨日の日付を含まない行だけを取得
+    awk "$2 !~ /${yday}/" |
     # 差分を取る
     diff - "$tmp-${calendar_id}_events" > "$tmp-${calendar_id}_diff"
   fi
@@ -53,7 +55,8 @@ if [ -s "$tmp-diff_for_send" ]; then
   tr -d "\n" > "$tmp-diff_for_send2"
 
   # Discordに通知
-  curl -X POST -H "Content-Type: application/json" -d '{"content": "'"$(cat $tmp-diff_for_send2)"'"}' "${DISCORD_WEBHOOK_URL}"
+#  curl -X POST -H "Content-Type: application/json" -d '{"content": "'"$(cat $tmp-diff_for_send2)"'"}' "${DISCORD_WEBHOOK_URL}"
+cat $tmp-diff_for_send2
 fi
 
 # 一時ファイルの削除

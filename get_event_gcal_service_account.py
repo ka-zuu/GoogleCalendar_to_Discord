@@ -22,8 +22,9 @@ def main():
         if not events:
             print('No upcoming events found.')
         for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
+            start_day = event['start'].get('dateTime', event['start'].get('date'))
+            end_day = event['end'].get('dateTime', event['end'].get('date'))
+            print(start_day, end_day, event['summary'])
 
     except HttpError as error:
         print('An error occurred: %s' % error)
